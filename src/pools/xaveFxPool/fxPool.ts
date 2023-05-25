@@ -1,7 +1,12 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
+import {
+    BigNumber as OldBigNumber,
+    ZERO,
+    bnum,
+    scale,
+} from '../../utils/bignumber';
 import { isSameAddress } from '../../utils';
 import { universalNormalizedLiquidity } from '../liquidity';
 import {
@@ -22,6 +27,7 @@ import {
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
 } from './fxPoolMath';
+import { BONE } from '../../utils/basicOperations';
 
 type FxPoolToken = Pick<
     SubgraphToken,
@@ -29,28 +35,28 @@ type FxPoolToken = Pick<
 >;
 
 export type FxPoolPairData = PoolPairBase & {
-    alpha: BigNumber;
-    beta: BigNumber;
-    lambda: BigNumber;
-    delta: BigNumber;
-    epsilon: BigNumber;
-    tokenInLatestFXPrice: OldBigNumber;
-    tokenOutLatestFXPrice: OldBigNumber;
+    alpha: bigint;
+    beta: bigint;
+    lambda: bigint;
+    delta: bigint;
+    epsilon: bigint;
+    tokenInLatestFXPrice: bigint;
+    tokenOutLatestFXPrice: bigint;
 };
 
 export class FxPool implements PoolBase<FxPoolPairData> {
     poolType: PoolTypes = PoolTypes.Fx;
     id: string;
     address: string;
-    swapFee: BigNumber;
-    totalShares: BigNumber;
+    swapFee: BigNumber; // from balancer
+    totalShares: BigNumber; // from balancer
     tokens: FxPoolToken[];
     tokensList: string[];
-    alpha: BigNumber;
-    beta: BigNumber;
-    lambda: BigNumber;
-    delta: BigNumber;
-    epsilon: BigNumber;
+    alpha: bigint;
+    beta: bigint;
+    lambda: bigint;
+    delta: bigint;
+    epsilon: bigint;
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
         if (
@@ -68,7 +74,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             pool.totalShares,
             pool.tokens,
             pool.tokensList,
-            pool.alpha,
+            bnum(pool.alpha), //@todo check
             pool.beta,
             pool.lambda,
             pool.delta,
@@ -83,7 +89,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         totalShares: string,
         tokens: FxPoolToken[],
         tokensList: string[],
-        alpha: string,
+        alpha: OldBigNumber,
         beta: string,
         lambda: string,
         delta: string,
@@ -95,11 +101,11 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.alpha = parseFixed(alpha, 18);
-        this.beta = parseFixed(beta, 18);
-        this.lambda = parseFixed(lambda, 18);
-        this.delta = parseFixed(delta, 18);
-        this.epsilon = parseFixed(epsilon, 18);
+        this.alpha = parseFixed(alpha.toString(), 18).toBigInt();
+        this.beta = parseFixed(beta, 18).toBigInt();
+        this.lambda = parseFixed(lambda, 18).toBigInt();
+        this.delta = parseFixed(delta, 18).toBigInt();
+        this.epsilon = parseFixed(epsilon, 18).toBigInt();
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;
     mainIndex?: number | undefined;
@@ -146,16 +152,22 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             tokenOut: tokenOut,
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
-            balanceIn: parseFixed(balanceIn, decimalsIn),
-            balanceOut: parseFixed(balanceOut, decimalsOut),
+            balanceIn: parseFixed(balanceIn, 18), // subgraph balance is in number convert to wei
+            balanceOut: parseFixed(balanceOut, 18), // subgraph balance is in number convert to wei
             swapFee: this.swapFee,
             alpha: this.alpha,
             beta: this.beta,
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInLatestFXPrice: bnum(tI.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenOutLatestFXPrice: bnum(tO.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenInLatestFXPrice: parseFixed(
+                tI.token.latestFXPrice,
+                18
+            ).toBigInt(), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenOutLatestFXPrice: parseFixed(
+                tO.token.latestFXPrice,
+                18
+            ).toBigInt(), // decimals is formatted from subgraph in rate we get from the chainlink oracle
         };
 
         return poolPairData;
@@ -185,9 +197,16 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         try {
             const parsedReserves = poolBalancesToNumeraire(poolPairData);
 
-            const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
+            const alphaValue = parseFixed(
+                poolPairData.alpha.toString(),
+                18
+            ).toBigInt();
 
-            const maxLimit = (1 + alphaValue) * parsedReserves._oGLiq * 0.5;
+            const maxLimit =
+                (BONE + alphaValue) *
+                parsedReserves._oGLiq *
+                parseFixed('0.5', 18).toBigInt();
+            18;
 
             if (swapType === SwapTypes.SwapExactIn) {
                 const maxLimitAmount =
@@ -195,8 +214,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
                 return bnum(
                     viewRawAmount(
-                        maxLimitAmount,
-                        poolPairData.tokenInLatestFXPrice.toNumber()
+                        BigInt(maxLimitAmount),
+                        poolPairData.tokenInLatestFXPrice
                     ).toString()
                 );
             } else {
@@ -205,8 +224,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
                 return bnum(
                     viewRawAmount(
-                        maxLimitAmount,
-                        poolPairData.tokenOutLatestFXPrice.toNumber()
+                        BigInt(maxLimitAmount),
+                        poolPairData.tokenOutLatestFXPrice
                     ).toString()
                 );
             }
@@ -246,6 +265,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         try {
             return _tokenInForExactTokenOut(amount, poolPairData);
         } catch {
+            console.log('Catch zero for _tokenInForExactTokenOut');
             return ZERO;
         }
     }
@@ -260,6 +280,9 @@ export class FxPool implements PoolBase<FxPoolPairData> {
                 amount
             );
         } catch {
+            console.log(
+                '_spotPriceAfterSwapExactTokenInForTokenOut - catch zero'
+            );
             return ZERO;
         }
     }

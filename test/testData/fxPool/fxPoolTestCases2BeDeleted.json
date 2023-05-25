@@ -1,0 +1,14 @@
+[
+    {
+        "testNo": "1",
+        "description": "Swap within Beta Region: OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD",
+        "swapType": "OriginSwap",
+        "givenAmount": "100000",
+        "tokenIn": "USDC",
+        "tokenOut": "XSGD",
+        "expectedSpotPriceBeforeSwap": "0.743394117",
+        "expectedSpotPriceAfterSwap": "0.743394117",
+        "expectedSwapOutput": "99950.00",
+        "expectedDerivativeSpotPriceAfterSwap": "0"
+    }
+]
