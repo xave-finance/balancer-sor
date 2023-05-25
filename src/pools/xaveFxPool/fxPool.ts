@@ -1,12 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import {
-    BigNumber as OldBigNumber,
-    ZERO,
-    bnum,
-    scale,
-} from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
 import { isSameAddress } from '../../utils';
 import { universalNormalizedLiquidity } from '../liquidity';
 import {
