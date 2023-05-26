@@ -3,9 +3,17 @@ import { BigNumber as OldBigNumber, bnum, scale } from '../../utils/bignumber';
 import { FxPoolPairData } from './fxPool';
 import { parseFixed } from '@ethersproject/bignumber';
 
-// Constants
+/**
+ * General Flow:
+ * Everything goes on either the ExactIn (origin swap) function and ExactOut (target swap) functions.
+ * It goes in as OldBigNumber, converted to bigint and does all the calculations in bigint
+ * then it returns it back as OldBigNumber based on how the SOR needs it
+ */
+
+/*****  CONSTANTS  *****/
 export const CURVEMATH_MAX_DIFF = -0.000001000000000000024;
 export const NEGATIVE_ONE = BigInt('-1');
+
 export const ONE_TO_THE_SECOND_NUM = 100;
 export const ONE_TO_THE_SECOND = BigInt(`${ONE_TO_THE_SECOND_NUM}`);
 export const ONE_TO_THE_EIGHT_NUM = 100000000;
@@ -13,19 +21,19 @@ export const ONE_TO_THE_EIGHT = BigInt(`${ONE_TO_THE_EIGHT_NUM}`);
 export const ONE_TO_THE_SIX_NUM = 1000000;
 export const ONE_TO_THE_SIX = BigInt(`${ONE_TO_THE_SIX_NUM}`);
 export const ONE_TO_THE_THIRTEEN_NUM = 10000000000000;
-export const ONE_TO_THE_THIRTEEN = BigInt(`${ONE_TO_THE_THIRTEEN_NUM}`);
-export const ONE_ETHER = scale(bnum('1'), 18);
-export const ALMOST_ZERO = 0.0000000000000000001; // swapping within beta region has no slippage
-const CURVEMATH_MAX = '0.25'; //CURVEMATH MAX from contract
-const CURVEMATH_MAX_BIGINT = parseFixed(CURVEMATH_MAX, 18).toBigInt(); // check math
 
+export const ONE_TO_THE_THIRTEEN = BigInt(`${ONE_TO_THE_THIRTEEN_NUM}`);
+export const ONE_ETHER = scale(bnum('1'), 18); // 1 ether in wei
+export const ALMOST_ZERO = 0.0000000000000000001; // swapping within beta region has no slippage
+const CURVEMATH_MAX = '0.25'; // CURVEMATH MAX from contract
+const CURVEMATH_MAX_BIGINT = parseFixed(CURVEMATH_MAX, 18).toBigInt(); // CURVEMATH_MAX converted to wei
+
+// helper for getting the absolute value of a bigint type
 // doing eslint disable to handle negative zero if it appears
 // eslint-disable-next-line no-compare-neg-zero
 const abs = (n): bigint => (n === -0 || n < BZERO ? -n : n);
 
-// @todo scaleDownBigIntToBigNumber
-// export const scaleDownBigIntToBigNumber = (bigIntInput: bigint) => {};
-
+// Messages simulating reverts from the contract
 export enum CurveMathRevert {
     LowerHalt = 'CurveMath/lower-halt',
     UpperHalt = 'CurveMath/upper-halt',
@@ -33,6 +41,8 @@ export enum CurveMathRevert {
     SwapConvergenceFailed = 'CurveMath/swap-convergence-failed',
     CannotSwap = 'CannotSwap',
 }
+
+/*****  INTERFACES  *****/
 
 interface ParsedFxPoolData {
     alpha: bigint;
@@ -54,6 +64,7 @@ interface ReservesInNumeraire {
     _oGLiq: bigint;
 }
 
+// checks if the token is the quote token, must be updated if we will be supporting other quote tokens
 const isUSDC = (address: string) => {
     if (
         address == '0x2791bca1f2de4661ed88a30c99a7a9449aa84174' ||
@@ -65,11 +76,13 @@ const isUSDC = (address: string) => {
     }
 };
 
+/*****  HELPER FUNCTIONS  *****/
+// calculate given amount in numeraire and returns a BigInt type of the numeraire in wei
 const calculateGivenAmountInNumeraire = (
     isOriginSwap: boolean,
     poolPairData: FxPoolPairData,
     amount: OldBigNumber
-) => {
+): bigint => {
     let calculatedNumeraireAmount;
 
     if (isOriginSwap) {
@@ -89,6 +102,7 @@ const calculateGivenAmountInNumeraire = (
     return calculatedNumeraireAmount;
 };
 
+// convert pool balances to numeraire, it will return both quote and base token balances in the fxpool
 export const poolBalancesToNumeraire = (
     poolPairData: FxPoolPairData
 ): ReservesInNumeraire => {
@@ -143,6 +157,7 @@ export const poolBalancesToNumeraire = (
 };
 
 // everything is in order of USDC, base token
+// this function formats the values to BigInt and work with it on the fxpool functions
 const getParsedFxPoolData = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData,
@@ -212,6 +227,7 @@ const getParsedFxPoolData = (
 
 // get base decimals for
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// returns token decimals in BigInt and in wei
 export const getBaseDecimals = (decimals: number): bigint => {
     switch (decimals) {
         case 6: {
@@ -232,8 +248,9 @@ export const getBaseDecimals = (decimals: number): bigint => {
     }
 };
 
-// Base Assimilator Functions
+/*****  ASSIMILATOR FUNCTIONS  *****/
 // calculations are from the BaseToUsdAssimilator
+// returns the dollar value of the amount in BigNumber type from BigNumber.js
 export const viewRawAmount = (_amount: bigint, rate: bigint): OldBigNumber => {
     console.log(`viewRawAmount - rate: ${rate}`);
     console.log(`viewRawAmount - _amount: ${_amount}`);
@@ -241,16 +258,17 @@ export const viewRawAmount = (_amount: bigint, rate: bigint): OldBigNumber => {
 
     return bnum(_amount.toString())
         .dividedBy(bnum(rate.toString()))
-        .dividedBy(ONE_ETHER); // @todo check accuracy
+        .dividedBy(ONE_ETHER);
 };
 
+// returns the numeraire amount in wei and BigInt type
 const viewNumeraireAmount = (_amount: OldBigNumber, rate: bigint): bigint => {
     const amountInWei = BigInt(scale(_amount, 18).toString());
     return (amountInWei * rate) / ONE;
 };
 
-// Curve Math
-// calculations are from CurveMath.sol
+/*****  CURVE MATH  *****/
+// calculations are from CurveMath.sol, working with BigInt
 const calculateMicroFee = (
     _bal: bigint,
     _ideal: bigint,
@@ -302,6 +320,7 @@ const calculateMicroFee = (
     return fee_;
 };
 
+// calculations are from CurveMath.sol, working with BigInt
 const calculateFee = (
     _gLiq: bigint,
     _bals: bigint[],
@@ -326,6 +345,7 @@ const calculateFee = (
 };
 
 // return outputAmount and ngliq
+// calculations are from CurveMath.sol, working with BigInt
 const calculateTrade = (
     _oGLiq: bigint,
     _nGLiq: bigint,
@@ -402,6 +422,7 @@ const calculateTrade = (
 };
 
 // invariant enforcement
+// calculations are from CurveMath.sol, working with BigInt
 const enforceHalts = (
     _oGLiq: bigint,
     _nGLiq: bigint,
@@ -472,6 +493,7 @@ const enforceHalts = (
     return true;
 };
 
+// calculations are from CurveMath.sol, working with BigInt
 const enforceSwapInvariant = (
     _oGLiq: bigint,
     _omega: bigint,
@@ -492,7 +514,7 @@ const enforceSwapInvariant = (
     }
 };
 
-// Exported functions
+/*****  SWAP FUNCTION  *****/
 
 // origin swap
 export function _exactTokenInForTokenOut(
@@ -626,6 +648,8 @@ export function _tokenInForExactTokenOut(
         return viewRawAmount(_amtWithFee, poolPairData.tokenInLatestFXPrice); // must be the token out
     }
 }
+
+/*****  SOR CALCULATORS *****/
 
 export const spotPriceBeforeSwap = (
     amount: OldBigNumber,
