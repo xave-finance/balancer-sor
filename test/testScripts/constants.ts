@@ -11,6 +11,7 @@ export enum Network {
     ZKEVM = 1101,
     AVALANCHE = 43114,
     BASE = 8453,
+    KATLA = 167008,
 }
 
 export const SOR_CONFIG: Record<Network, SorConfig> = {
@@ -168,6 +169,17 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
             '0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d',
         ],
     },
+    [Network.KATLA]: {
+        chainId: Network.KATLA,
+        vault: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
+        weth: '0x4200000000000000000000000000000000000006',
+        connectingTokens: [
+            {
+                symbol: 'WETH',
+                address: '0x4200000000000000000000000000000000000006',
+            },
+        ],
+    },
 };
 
 export const PROVIDER_URLS = {
@@ -179,6 +191,7 @@ export const PROVIDER_URLS = {
     [Network.ZKEVM]: process.env.RPC_URL_ZKEVM,
     [Network.AVALANCHE]: process.env.RPC_URL_AVALANCHE,
     [Network.BASE]: process.env.RPC_URL_BASE,
+    [Network.KATLA]: process.env.RPC_URL_KATLA,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -194,6 +207,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     1101: '0xca11bde05977b3631167028862be2a173976ca11',
     43114: '0xcA11bde05977b3631167028862bE2a173976CA11',
     8453: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    167008: '0xcA11bde05977b3631167028862bE2a173976CA11',
 };
 
 export const SUBGRAPH_URLS = {
@@ -208,10 +222,12 @@ export const SUBGRAPH_URLS = {
     [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
     [Network.AVALANCHE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2`,
     [Network.BASE]: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
+    [Network.KATLA]: `https://app.goldsky.com/dashboard/subgraphs/katla/0.0.4`,
 };
 
 // This is the same across networks
-export const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+// export const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8'; // @todo change depending on the chain id?
+export const vaultAddr = '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba';
 
 export const ADDRESSES = {
     [Network.MAINNET]: {
@@ -637,6 +653,29 @@ export const ADDRESSES = {
             address: '0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8',
             decimals: 18,
             symbol: 'BALD',
+        },
+    },
+
+    [Network.KATLA]: {
+        WETH: {
+            address: '0x46B40474959dC321D990Cdc8209e9fa103F2b45d',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        USDC: {
+            address: '0x3481c2314E4D15603A05Ee7e6BE25fcE4B128a5c',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        DAI: {
+            address: '0x9f555A3115C2Da9574c84C4Dfb1617193aA7AFE2',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+        BAL: {
+            address: '0x58A501c3Cc724aB1Ac9184452C16E158d5122d48',
+            decimals: 18,
+            symbol: 'BAL',
         },
     },
 };
