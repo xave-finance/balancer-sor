@@ -172,11 +172,11 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
     [Network.KATLA]: {
         chainId: Network.KATLA,
         vault: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
-        weth: '0x4200000000000000000000000000000000000006',
+        weth: '0x46B40474959dC321D990Cdc8209e9fa103F2b45d',
         connectingTokens: [
             {
                 symbol: 'WETH',
-                address: '0x4200000000000000000000000000000000000006',
+                address: '0x46B40474959dC321D990Cdc8209e9fa103F2b45d',
             },
         ],
     },
@@ -222,7 +222,7 @@ export const SUBGRAPH_URLS = {
     [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
     [Network.AVALANCHE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2`,
     [Network.BASE]: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
-    [Network.KATLA]: `https://app.goldsky.com/dashboard/subgraphs/katla/0.0.4`,
+    [Network.KATLA]: `https://api.goldsky.com/api/public/project_cluukfpdrw61a01xag6yihcuy/subgraphs/katla/prod/gn`,
 };
 
 // This is the same across networks
