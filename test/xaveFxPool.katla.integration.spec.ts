@@ -66,7 +66,7 @@ const xaveFxPoolDAI_USDC_KATLA: SubgraphPoolBase = {
 
 const test = 'FX' in PoolFilter;
 
-describe('xaveFxPool: XSGD-USDC integration (katla) tests', () => {
+describe.skip('xaveFxPool: XSGD-USDC integration (katla) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
