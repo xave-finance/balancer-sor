@@ -126,6 +126,7 @@ export interface SubgraphPoolBase {
     // FxPool
     delta?: string;
     epsilon?: string;
+    quoteToken?: string;
 }
 
 export type SubgraphToken = {

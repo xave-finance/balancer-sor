@@ -63,6 +63,7 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
     lambda: '0.3',
     delta: '0.3',
     epsilon: '0.0015',
+    quoteToken: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
 };
 
 const test = 'FX' in PoolFilter;

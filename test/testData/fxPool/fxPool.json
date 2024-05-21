@@ -41,7 +41,8 @@
             "beta": "0.48",
             "lambda": "0.3",
             "delta": "0.2734375",
-            "epsilon": "0.0005"
+            "epsilon": "0.0005",
+            "quoteToken": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"
         }
     ]
 }

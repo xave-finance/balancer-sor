@@ -113,10 +113,10 @@ describe('xaveFxPool: fxPools stub test', () => {
                     const newPool = FxPool.fromPool(poolData);
 
                     const poolPairData = newPool.parsePoolPairData(
-                        testCase.tokenIn === 'USDC'
+                        testCase.tokenIn === poolData.tokens[0].symbol
                             ? newPool.tokens[0].address
                             : newPool.tokens[1].address, // tokenIn
-                        testCase.tokenOut === 'USDC'
+                        testCase.tokenOut === poolData.tokens[0].symbol
                             ? newPool.tokens[0].address
                             : newPool.tokens[1].address // tokenOut
                     );
@@ -269,6 +269,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                 lambda: bnum('0x0429d069189e0000'),
                 delta: bnum('0x03cb71f51fc55800'),
                 epsilon: bnum('0x01c6bf52634000'),
+                quoteToken: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
                 tokenInLatestFXPrice: BigNumber.from('99963085000000'),
                 tokenOutLatestFXPrice: BigNumber.from('74200489000000'),
                 tokenInfxOracleDecimals: 8,

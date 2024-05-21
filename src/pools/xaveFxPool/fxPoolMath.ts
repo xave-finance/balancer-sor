@@ -39,18 +39,6 @@ interface ReservesInNumeraire {
     _oGLiq_36: BigNumber;
 }
 
-const isUSDC = (address: string) => {
-    if (
-        address == '0x2791bca1f2de4661ed88a30c99a7a9449aa84174' || // Polygon
-        address == '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' || // Mainnet
-        address == '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E' // AVAX
-    ) {
-        return true;
-    } else {
-        return false;
-    }
-};
-
 const calculateGivenAmountInNumeraire = (
     isOriginSwap: boolean,
     poolPairData: FxPoolPairData,
@@ -114,43 +102,50 @@ const getParsedFxPoolData = (
     isOriginSwap: boolean
 ): ParsedFxPoolData => {
     // reserves are in raw amount, they converted to numeraire
-    const baseReserves_36 = isUSDC(poolPairData.tokenIn)
-        ? viewNumeraireAmount(
-              safeParseFixed(poolPairData.balanceOut.toString(), 36),
-              poolPairData.decimalsOut,
-              poolPairData.tokenOutLatestFXPrice,
-              poolPairData.tokenOutfxOracleDecimals
-          )
-        : viewNumeraireAmount(
-              safeParseFixed(poolPairData.balanceIn.toString(), 36),
-              poolPairData.decimalsIn,
-              poolPairData.tokenInLatestFXPrice,
-              poolPairData.tokenInfxOracleDecimals
-          );
+    const baseReserves_36 =
+        poolPairData.tokenIn === poolPairData.quoteToken
+            ? viewNumeraireAmount(
+                  safeParseFixed(poolPairData.balanceOut.toString(), 36),
+                  poolPairData.decimalsOut,
+                  poolPairData.tokenOutLatestFXPrice,
+                  poolPairData.tokenOutfxOracleDecimals
+              )
+            : viewNumeraireAmount(
+                  safeParseFixed(poolPairData.balanceIn.toString(), 36),
+                  poolPairData.decimalsIn,
+                  poolPairData.tokenInLatestFXPrice,
+                  poolPairData.tokenInfxOracleDecimals
+              );
 
     // reserves are not in wei
-    const usdcReserves_36 = isUSDC(poolPairData.tokenIn)
-        ? viewNumeraireAmount(
-              safeParseFixed(poolPairData.balanceIn.toString(), 36),
-              poolPairData.decimalsIn,
-              poolPairData.tokenInLatestFXPrice,
-              poolPairData.tokenInfxOracleDecimals
-          )
-        : viewNumeraireAmount(
-              safeParseFixed(poolPairData.balanceOut.toString(), 36),
-              poolPairData.decimalsOut,
-              poolPairData.tokenOutLatestFXPrice,
-              poolPairData.tokenOutfxOracleDecimals
-          );
+    const usdcReserves_36 =
+        poolPairData.tokenIn === poolPairData.quoteToken
+            ? viewNumeraireAmount(
+                  safeParseFixed(poolPairData.balanceIn.toString(), 36),
+                  poolPairData.decimalsIn,
+                  poolPairData.tokenInLatestFXPrice,
+                  poolPairData.tokenInfxOracleDecimals
+              )
+            : viewNumeraireAmount(
+                  safeParseFixed(poolPairData.balanceOut.toString(), 36),
+                  poolPairData.decimalsOut,
+                  poolPairData.tokenOutLatestFXPrice,
+                  poolPairData.tokenOutfxOracleDecimals
+              );
 
     // rate is converted from chainlink to the actual rate in decimals
-    const baseTokenRate_36 = isUSDC(poolPairData.tokenIn)
-        ? poolPairData.tokenOutLatestFXPrice
-              .mul(ONE_36)
-              .div(safeParseFixed('1', poolPairData.tokenOutfxOracleDecimals))
-        : poolPairData.tokenInLatestFXPrice
-              .mul(ONE_36)
-              .div(safeParseFixed('1', poolPairData.tokenInfxOracleDecimals));
+    const baseTokenRate_36 =
+        poolPairData.tokenIn === poolPairData.quoteToken
+            ? poolPairData.tokenOutLatestFXPrice
+                  .mul(ONE_36)
+                  .div(
+                      safeParseFixed('1', poolPairData.tokenOutfxOracleDecimals)
+                  )
+            : poolPairData.tokenInLatestFXPrice
+                  .mul(ONE_36)
+                  .div(
+                      safeParseFixed('1', poolPairData.tokenInfxOracleDecimals)
+                  );
 
     // given amount in or out converted to numeraire
     const givenAmountInNumeraire_36 = calculateGivenAmountInNumeraire(
@@ -171,15 +166,16 @@ const getParsedFxPoolData = (
         _oGLiq_36: baseReserves_36.add(usdcReserves_36),
         _nGLiq_36: baseReserves_36.add(usdcReserves_36),
         _oBals_36: [usdcReserves_36, baseReserves_36],
-        _nBals_36: isUSDC(poolPairData.tokenIn)
-            ? [
-                  usdcReserves_36.add(givenAmountInNumeraire_36),
-                  baseReserves_36.sub(givenAmountInNumeraire_36),
-              ]
-            : [
-                  usdcReserves_36.sub(givenAmountInNumeraire_36),
-                  baseReserves_36.add(givenAmountInNumeraire_36),
-              ],
+        _nBals_36:
+            poolPairData.tokenIn === poolPairData.quoteToken
+                ? [
+                      usdcReserves_36.add(givenAmountInNumeraire_36),
+                      baseReserves_36.sub(givenAmountInNumeraire_36),
+                  ]
+                : [
+                      usdcReserves_36.sub(givenAmountInNumeraire_36),
+                      baseReserves_36.add(givenAmountInNumeraire_36),
+                  ],
 
         givenAmountInNumeraire_36: givenAmountInNumeraire_36,
     };
@@ -495,7 +491,7 @@ export function _exactTokenInForTokenOut(
         _oBals_36, // _oBals
         _nBals_36, // _nBals
         targetAmountInNumeraire_36, // input amount
-        isUSDC(poolPairData.tokenIn) ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
+        poolPairData.tokenIn === poolPairData.quoteToken ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
         parsedFxPoolData
     );
 
@@ -549,7 +545,7 @@ export function _tokenInForExactTokenOut(
         parsedFxPoolData._oBals_36,
         parsedFxPoolData._nBals_36,
         targetAmountInNumeraire_36,
-        isUSDC(poolPairData.tokenIn) ? 0 : 1, // if USDC return 0 else return 1 for base token
+        poolPairData.tokenIn === poolPairData.quoteToken ? 0 : 1, // if USDC return 0 else return 1 for base token
         parsedFxPoolData
     );
 
@@ -624,7 +620,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         _oBals_36,
         _nBals_36,
         targetAmountInNumeraire_36, // input amount
-        isUSDC(poolPairData.tokenIn) ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
+        poolPairData.tokenIn === poolPairData.quoteToken ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
         parsedFxPoolData
     );
 
@@ -641,7 +637,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         .mul(_oGLiq_36)
         .div(ONE_36);
 
-    if (isUSDC(poolPairData.tokenIn)) {
+    if (poolPairData.tokenIn === poolPairData.quoteToken) {
         // token[0] to token [1] in originswap
         const oBals0after_36 = _nBals_36[0];
 
@@ -735,7 +731,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         _oBals_36,
         _nBals_36,
         targetAmountInNumeraire_36, // input amount
-        isUSDC(poolPairData.tokenIn) ? 0 : 1, // if USDC return 0 else return 1 for base token
+        poolPairData.tokenIn === poolPairData.quoteToken ? 0 : 1, // if USDC return 0 else return 1 for base token
         parsedFxPoolData
     );
 
@@ -750,7 +746,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         .div(2)
         .mul(_oGLiq_36)
         .div(ONE_36);
-    if (isUSDC(poolPairData.tokenIn)) {
+    if (poolPairData.tokenIn === poolPairData.quoteToken) {
         // token[0] to token [1] in originswap
         const oBals0after_36 = _nBals_36[0];
         const oBals1after_36 = _nBals_36[1];

@@ -49,6 +49,7 @@ const queryWithLinear = `
           lambda
           delta
           epsilon
+          quoteToken
           tauAlphaX
           tauAlphaY
           tauBetaX

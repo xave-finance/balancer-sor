@@ -2,10 +2,11 @@
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SubgraphPoolBase, SwapTypes } from '../src';
-import { ADDRESSES, Network, vaultAddr } from './testScripts/constants';
+import { ADDRESSES, Network, SOR_CONFIG } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Vault__factory } from '@balancer-labs/typechain';
+import { Vault, Vault__factory } from '@balancer-labs/typechain';
+
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
@@ -22,10 +23,10 @@ let sor: SOR;
 const networkId = Network.POLYGON;
 const jsonRpcUrl = process.env.RPC_URL_POLYGON;
 const rpcUrl = 'http://127.0.0.1:8137';
-const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 43667355;
 
-const vault = Vault__factory.connect(vaultAddr, provider);
+let vault: Vault;
+
 // const SWAP_AMOUNT_IN_NUMERAIRE = '400000';
 const SWAP_AMOUNT_IN_NUMERAIRE = '600000';
 
@@ -70,12 +71,19 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     lambda: '0.3',
     delta: '0.2734375',
     epsilon: '0.0005',
+    quoteToken: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 };
 
 describe('xaveFxPool: DAI-USDC integration (Polygon) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
+            const provider = new JsonRpcProvider(rpcUrl, networkId);
+
+            vault = Vault__factory.connect(
+                SOR_CONFIG[networkId].vault,
+                provider
+            );
             sor = await setUp(
                 networkId,
                 provider,

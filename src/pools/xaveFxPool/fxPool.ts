@@ -37,6 +37,7 @@ export type FxPoolPairData = PoolPairBase & {
     lambda: OldBigNumber;
     delta: OldBigNumber;
     epsilon: OldBigNumber;
+    quoteToken: string;
     tokenInLatestFXPrice: BigNumber;
     tokenInfxOracleDecimals: number;
     tokenOutLatestFXPrice: BigNumber;
@@ -56,6 +57,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
     lambda: OldBigNumber;
     delta: OldBigNumber;
     epsilon: OldBigNumber;
+    quoteToken: string;
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
         if (
@@ -63,7 +65,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             !pool.beta ||
             !pool.lambda ||
             !pool.delta ||
-            !pool.epsilon
+            !pool.epsilon ||
+            !pool.quoteToken
         )
             throw new Error('FX Pool Missing Subgraph Field');
         return new FxPool(
@@ -77,7 +80,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             pool.beta,
             pool.lambda,
             pool.delta,
-            pool.epsilon
+            pool.epsilon,
+            pool.quoteToken
         );
     }
 
@@ -92,7 +96,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         beta: string,
         lambda: string,
         delta: string,
-        epsilon: string
+        epsilon: string,
+        quoteToken: string
     ) {
         this.id = id;
         this.address = address;
@@ -105,6 +110,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         this.lambda = parseFixedCurveParam(lambda);
         this.delta = bnum(parseFixed(delta, 18).toString());
         this.epsilon = parseFixedCurveParam(epsilon);
+        this.quoteToken = quoteToken;
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;
     mainIndex?: number | undefined;
@@ -166,6 +172,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
+            quoteToken: this.quoteToken,
             tokenInLatestFXPrice: parseFixed(
                 tI.token.latestFXPrice,
                 tI.token.fxOracleDecimals
