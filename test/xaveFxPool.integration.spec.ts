@@ -2,10 +2,10 @@
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { PoolFilter, SOR, SubgraphPoolBase, SwapTypes } from '../src';
-import { ADDRESSES, Network, vaultAddr } from './testScripts/constants';
+import { ADDRESSES, Network, SOR_CONFIG } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Vault__factory } from '@balancer-labs/typechain';
+import { Vault, Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
@@ -15,10 +15,10 @@ let sor: SOR;
 const networkId = Network.MAINNET;
 const jsonRpcUrl = process.env.RPC_URL_MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545';
-const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 16797531;
 
-const vault = Vault__factory.connect(vaultAddr, provider);
+let vault: Vault;
+
 const SWAP_AMOUNT_IN_NUMERAIRE = '10';
 
 const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
@@ -71,6 +71,12 @@ describe('xaveFxPool: DAI-USDC integration (Mainnet) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
+            const provider = new JsonRpcProvider(rpcUrl, networkId);
+
+            vault = Vault__factory.connect(
+                SOR_CONFIG[networkId].vault,
+                provider
+            );
             sor = await setUp(
                 networkId,
                 provider,
@@ -105,7 +111,6 @@ describe('xaveFxPool: DAI-USDC integration (Mainnet) tests', () => {
                 swapType,
                 swapAmount
             );
-
             const queryResult = await vault.callStatic.queryBatchSwap(
                 swapType,
                 swapInfo.swaps,

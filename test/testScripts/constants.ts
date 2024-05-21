@@ -226,8 +226,8 @@ export const SUBGRAPH_URLS = {
 };
 
 // This is the same across networks
-// export const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8'; // @todo change depending on the chain id?
-export const vaultAddr = '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba';
+export const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8'; // @todo change depending on the chain id?
+// export const vaultAddr = '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba';
 
 export const ADDRESSES = {
     [Network.MAINNET]: {

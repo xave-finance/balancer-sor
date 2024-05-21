@@ -2,10 +2,10 @@
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { PoolFilter, SOR, SubgraphPoolBase, SwapTypes } from '../src';
-import { Network, vaultAddr } from './testScripts/constants';
+import { Network, SOR_CONFIG } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Vault__factory } from '@balancer-labs/typechain';
+import { Vault, Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
@@ -14,11 +14,11 @@ dotenv.config();
 let sor: SOR;
 const networkId = Network.KATLA;
 const jsonRpcUrl = process.env.KATLA_RPC_URL;
-const rpcUrl = 'http://127.0.0.1:8545';
-const provider = new JsonRpcProvider(rpcUrl, networkId);
+const rpcUrl = 'http://127.0.0.1:8138';
 const blocknumber = 1070561;
 
-const vault = Vault__factory.connect(vaultAddr, provider);
+let vault: Vault;
+
 const SWAP_AMOUNT_IN_NUMERAIRE = '10';
 
 const xaveFxPoolDAI_USDC_KATLA: SubgraphPoolBase = {
@@ -70,6 +70,12 @@ describe('xaveFxPool: XSGD-USDC integration (katla) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
+            const provider = new JsonRpcProvider(rpcUrl, networkId);
+            vault = Vault__factory.connect(
+                SOR_CONFIG[networkId].vault,
+                provider
+            );
+
             sor = await setUp(
                 networkId,
                 provider,
