@@ -234,7 +234,7 @@ export const setUp = async (
 
     // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
     const onChainPoolDataService = new OnChainPoolDataService({
-        vaultAddress: vaultAddr,
+        vaultAddress: SOR_CONFIG[networkId].vault,
         multiAddress: MULTIADDR[networkId],
         provider,
         pools,
