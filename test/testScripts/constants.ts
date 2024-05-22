@@ -11,6 +11,7 @@ export enum Network {
     ZKEVM = 1101,
     AVALANCHE = 43114,
     BASE = 8453,
+    ARTIO = 80085,
     KATLA = 167008,
 }
 
@@ -169,6 +170,17 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
             '0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d',
         ],
     },
+    [Network.ARTIO]: {
+        chainId: Network.ARTIO,
+        vault: '0xD6D473f54Cda4eb4396690e35d806131bdffE579',
+        weth: '0x8239FBb3e3D0C2cDFd7888D8aF7701240Ac4DcA4',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x8239FBb3e3D0C2cDFd7888D8aF7701240Ac4DcA4',
+            },
+        ],
+    },
     [Network.KATLA]: {
         chainId: Network.KATLA,
         vault: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
@@ -191,6 +203,7 @@ export const PROVIDER_URLS = {
     [Network.ZKEVM]: process.env.RPC_URL_ZKEVM,
     [Network.AVALANCHE]: process.env.RPC_URL_AVALANCHE,
     [Network.BASE]: process.env.RPC_URL_BASE,
+    [Network.ARTIO]: process.env.RPC_URL_ARTIO,
     [Network.KATLA]: process.env.RPC_URL_KATLA,
 };
 
@@ -207,6 +220,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     1101: '0xca11bde05977b3631167028862be2a173976ca11',
     43114: '0xcA11bde05977b3631167028862bE2a173976CA11',
     8453: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    80085: '0xcA11bde05977b3631167028862bE2a173976CA11',
     167008: '0xcA11bde05977b3631167028862bE2a173976CA11',
 };
 
@@ -222,6 +236,7 @@ export const SUBGRAPH_URLS = {
     [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
     [Network.AVALANCHE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2`,
     [Network.BASE]: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
+    [Network.ARTIO]: `https://api.goldsky.com/api/public/project_cluukfpdrw61a01xag6yihcuy/subgraphs/artio/prod/gn`,
     [Network.KATLA]: `https://api.goldsky.com/api/public/project_cluukfpdrw61a01xag6yihcuy/subgraphs/katla/prod/gn`,
 };
 
@@ -372,7 +387,7 @@ export const ADDRESSES = {
         },
         XSGD: {
             address: '0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96'.toLowerCase(),
-            decimals: 18,
+            decimals: 6,
             symbol: 'XSGD',
         },
         EURS: {
@@ -655,7 +670,33 @@ export const ADDRESSES = {
             symbol: 'BALD',
         },
     },
-
+    [Network.ARTIO]: {
+        BAL: {
+            address: '0x9AA488bc4c3c237104CD6661e076B22e0535eCFA',
+            decimals: 18,
+            symbol: 'BAL',
+        },
+        WETH: {
+            address: '0x8239FBb3e3D0C2cDFd7888D8aF7701240Ac4DcA4',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        USDC: {
+            address: '0xF5C462bf81a6b6af0f87749eFACe2453c35CB519',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        NECT: {
+            address: '0x45cb13b18a6cbb03a0367fb91cf27bacc069d46d',
+            decimals: 18,
+            symbol: 'NECT',
+        },
+        XSGD: {
+            address: '0x9e11bf9d712fe1f9117688924223edc139181183',
+            decimals: 6,
+            symbol: 'XSGD',
+        },
+    },
     [Network.KATLA]: {
         WETH: {
             address: '0x46B40474959dC321D990Cdc8209e9fa103F2b45d',

@@ -8,13 +8,22 @@
     "scripts": {
         "build": "rollup -c",
         "prepack": "yarn build",
+        "test-xave": "DEBUG=xave TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha --watch -r ts-node/register test/xaveFxPool**.ts --timeout 20000",
+        "test-xave-scratch": "DEBUG=xave TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha --watch -r ts-node/register test/xaveFxPool.scratch.spec.ts --timeout 20000",
+        "test-xave-spec": "DEBUG=xave TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha --watch -r ts-node/register test/xaveFxPool.spec.ts --timeout 20000",
+        "test-xave-polygon": "DEBUG=xave TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha --watch -r ts-node/register test/xaveFxPool.polygon.integration.spec.ts --timeout 20000",
+        "test-xave-no-polygon": "DEBUG=xave TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha --watch -r ts-node/register test/xaveFxPool.spec.ts test/xaveFxPool.math.spec.ts test/xaveFxPool.integration.spec.ts --timeout 20000",
+        "test-xave-integration": "DEBUG=xave:* TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha --watch -r ts-node/register test/xaveFxPool.integration.spec.ts --timeout 20000",
+        "test-xave-math": "DEBUG=xave TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha --watch -r ts-node/register test/xaveFxPool.math.spec.ts --timeout 20000",
         "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts --timeout 20000",
         "test:only": "TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register --timeout 20000",
         "example": "TS_NODE_PROJECT='tsconfig.testing.json' ts-node",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "lint": "eslint ./src ./test --ext .ts --max-warnings 0",
         "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(. ./.env && echo $RPC_URL_MAINNET)",
-        "node:polygon": "npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.polygon.ts node --fork $(. ./.env && echo $RPC_URL_POLYGON) --port 8137"
+        "node:polygon": "npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.polygon.ts node --fork $(. ./.env && echo $RPC_URL_POLYGON) --port 8137",
+        "node:katla": "npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.polygon.ts node --fork $(. ./.env && echo $RPC_URL_KATLA) --port 8138",
+        "node:artio": "npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.artio.ts node --fork $(. ./.env && echo $RPC_URL_ARTIO) --port 8139"
     },
     "husky": {
         "hooks": {
@@ -51,6 +60,7 @@
         "@typescript-eslint/parser": "^4.29.2",
         "bignumber.js": "^9.0.1",
         "chai": "^4.2.0",
+        "debug": "^4.3.4",
         "dotenv": "^8.2.0",
         "eslint": "^7.32.0",
         "eslint-plugin-mocha-no-only": "^1.1.1",
