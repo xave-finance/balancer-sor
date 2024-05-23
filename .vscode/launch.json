@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        ////////////////////////////// basic config to run all tests - works //////////////////////////////////////
+        /////////////////////// grep config to run CURRENTTEST only - doesn't work ////////////////////////////
+        {
+            "name": "mocha Xave FXPool Integration",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "[REPLACE_THIS_WITH_USER_HOME_DIR]/.nvm/versions/node/v16.20.2/bin/node",
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.testing.json",
+                "ALCHEMY_URL": "https://eth-mainnet.g.alchemy.com/v2/qJvGcVWzsADJfh1uUQT9pLC0QNI3XaOV"
+                // "___ALCHEMY_URL": "https://polygon-mainnet.g.alchemy.com/v2/AS3ZTitISrBgwO3os6YF0MoxbGRAga1p"
+            },
+            "program": "${workspaceRoot}/node_modules/.bin/mocha",
+            "stopOnEntry": false,
+            "args": [
+                "-r",
+                "ts-node/register",
+                // "${workspaceRoot}/test/xaveFxPool.math.spec.ts",
+                // "${workspaceRoot}/test/xaveFxPool.spec.ts",
+                // "${workspaceRoot}/test/xaveFxPool.scratch.spec.ts",
+                // "${workspaceRoot}/test/xaveFxPoolBug.integration.spec.ts",
+                "${workspaceRoot}/test/xaveFxPool.artio.integration.spec.ts",
+                "--no-timeouts",
+                "--colors",
+                "--recursive"
+            ],
+            "cwd": "${workspaceRoot}",
+            "internalConsoleOptions": "openOnSessionStart"
+            // "console": "integratedTerminal",
+        }
+    ]
+}
