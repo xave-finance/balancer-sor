@@ -30,6 +30,16 @@ const poolsStub: SubgraphPoolBase[] = [
         totalShares: '10127168.217853595061660665',
         swapEnabled: true,
         totalWeight: '0',
+        tokensList: [
+            '0x45cb13b18a6cbb03a0367fb91cf27bacc069d46d',
+            '0xa0e91e69b43021b3c6748cfe16296ff4b933bd00',
+        ],
+        alpha: '0.8',
+        beta: '0.48',
+        lambda: '0.3',
+        delta: '0.2734375',
+        epsilon: '0.0005',
+        quoteToken: '0xa0e91e69b43021b3c6748cfe16296ff4b933bd00',
         tokens: [
             {
                 address: '0x45cb13b18a6cbb03a0367fb91cf27bacc069d46d',
@@ -65,6 +75,16 @@ const poolsStub: SubgraphPoolBase[] = [
         totalShares: '10483794.004506793230443968',
         swapEnabled: true,
         totalWeight: '0',
+        tokensList: [
+            '0xa0e91e69b43021b3c6748cfe16296ff4b933bd00',
+            '0xf5c462bf81a6b6af0f87749eface2453c35cb519',
+        ],
+        alpha: '0.8',
+        beta: '0.48',
+        lambda: '0.3',
+        delta: '0.2734375',
+        epsilon: '0.0005',
+        quoteToken: '0xf5c462bf81a6b6af0f87749eface2453c35cb519',
         tokens: [
             {
                 address: '0xa0e91e69b43021b3c6748cfe16296ff4b933bd00',
@@ -100,6 +120,16 @@ const poolsStub: SubgraphPoolBase[] = [
         totalShares: '10134881.22916366614112',
         swapEnabled: true,
         totalWeight: '0',
+        tokensList: [
+            '0x9e11bf9d712fe1f9117688924223edc139181183',
+            '0xf5c462bf81a6b6af0f87749eface2453c35cb519',
+        ],
+        alpha: '0.8',
+        beta: '0.48',
+        lambda: '0.3',
+        delta: '0.2734375',
+        epsilon: '0.0005',
+        quoteToken: '0xf5c462bf81a6b6af0f87749eface2453c35cb519',
         tokens: [
             {
                 address: '0x9e11bf9d712fe1f9117688924223edc139181183',
@@ -175,7 +205,7 @@ describe('[ARTIO] xaveFxPool: Multi-hop different quote token tests', () => {
                 swapType,
                 swapAmount
             );
-            if (swapInfo.swaps.length === 0) {
+            if (!swapInfo.swaps || swapInfo.swaps.length === 0) {
                 console.log('No swaps found');
                 return;
             }
