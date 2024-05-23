@@ -14,7 +14,7 @@ import {
     SorConfig,
     PoolDictionary,
 } from '../types';
-import { getTriPaths } from './triPaths';
+import { PoolSimple, findSwapPathPools, getTriPaths } from './triPaths';
 
 export class RouteProposer {
     cache: Record<string, { paths: NewPath[] }> = {};
@@ -80,12 +80,18 @@ export class RouteProposer {
             this.config
         );
 
-        const triPaths = getTriPaths(
+        const triPathMidPoolsDynamic = findSwapPathPools(
             tokenIn,
             tokenOut,
-            poolsAllDict,
-            this.config.triPathMidPoolIds ?? []
+            Object.values(poolsAllDict).map(
+                (pool) => <PoolSimple>{ id: pool.id, tokens: pool.tokensList }
+            )
         );
+
+        const triPaths = getTriPaths(tokenIn, tokenOut, poolsAllDict, [
+            ...(this.config.triPathMidPoolIds ?? []),
+            ...triPathMidPoolsDynamic,
+        ]);
 
         const combinedPathData = pathData
             .concat(...boostedPaths)

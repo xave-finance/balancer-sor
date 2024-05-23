@@ -51,6 +51,55 @@ function getMidPoolTriPaths(
     return constructPaths(tokenIn, tokenOut, tokenPools, midPool);
 }
 
+export interface PoolSimple {
+    id: string; // Added pool ID
+    tokens: string[];
+}
+
+export function findSwapPathPools(
+    tX: string,
+    tY: string,
+    pools: PoolSimple[]
+): string[] {
+    const graph: Record<string, string[]> = {};
+
+    // Build graph from pools (including pool IDs in edges)
+    for (const pool of pools) {
+        for (let i = 0; i < pool.tokens.length; i++) {
+            for (let j = i + 1; j < pool.tokens.length; j++) {
+                const token1 = pool.tokens[i];
+                const token2 = pool.tokens[j];
+                graph[token1] = graph[token1] || [];
+                // Edge now includes pool ID:
+                graph[token1].push(`${token2}@${pool.id}`);
+                graph[token2] = graph[token2] || [];
+                graph[token2].push(`${token1}@${pool.id}`);
+            }
+        }
+    }
+
+    const queue: [string, [string, string][]][] = [[tX, []]]; // Queue with path (token, [token, poolId][])
+    const visited = new Set<string>([tX]);
+
+    while (queue.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const [currentToken, path] = queue.shift()!;
+        if (currentToken === tY) {
+            return path.map((p) => p[1]); // Path found - return only the poolIds
+        }
+
+        for (const neighborWithPool of graph[currentToken] || []) {
+            const [neighbor, poolId] = neighborWithPool.split('@');
+            if (!visited.has(neighbor)) {
+                visited.add(neighbor);
+                queue.push([neighbor, [...path, [currentToken, poolId]]]);
+            }
+        }
+    }
+
+    return []; // No path found
+}
+
 /**
  * Construct all possible paths for tokenIn>tokenOut via midPool using most liquid connecting pools
  * @param tokenIn
