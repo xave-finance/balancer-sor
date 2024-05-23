@@ -2,11 +2,9 @@
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { PoolFilter, SOR, SubgraphPoolBase, SwapTypes } from '../src';
-import { ADDRESSES, Network, SOR_CONFIG } from './testScripts/constants';
+import { ADDRESSES, Network } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { Vault, Vault__factory } from '@balancer-labs/typechain';
-import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
 dotenv.config();
@@ -16,8 +14,6 @@ const networkId = Network.ARTIO;
 const jsonRpcUrl = process.env.RPC_URL_ARTIO;
 const rpcUrl = 'http://127.0.0.1:8139';
 const blocknumber = 2258323;
-
-let vault: Vault;
 
 const SWAP_AMOUNT_IN_NUMERAIRE = '10';
 
@@ -162,15 +158,10 @@ const poolsStub: SubgraphPoolBase[] = [
 const test = 'FX' in PoolFilter;
 
 describe('[ARTIO] xaveFxPool: Multi-hop different quote token tests', () => {
-    context('test swaps vs queryBatchSwap', () => {
+    context('test SOR swaps', () => {
         // Setup chain
         before(async function () {
             const provider = new JsonRpcProvider(rpcUrl, networkId);
-
-            vault = Vault__factory.connect(
-                SOR_CONFIG[networkId].vault,
-                provider
-            );
             sor = await setUp(
                 networkId,
                 provider,
@@ -185,13 +176,6 @@ describe('[ARTIO] xaveFxPool: Multi-hop different quote token tests', () => {
         const tokenIn = ADDRESSES[Network.ARTIO].NECT.address;
         const tokenOut = ADDRESSES[Network.ARTIO].XSGD.address;
 
-        const funds = {
-            sender: AddressZero,
-            recipient: AddressZero,
-            fromInternalBalance: false,
-            toInternalBalance: false,
-        };
-
         it('ExactIn', async function () {
             if (!test) this.skip();
 
@@ -205,55 +189,27 @@ describe('[ARTIO] xaveFxPool: Multi-hop different quote token tests', () => {
                 swapType,
                 swapAmount
             );
-            if (!swapInfo.swaps || swapInfo.swaps.length === 0) {
-                console.log('No swaps found');
-                return;
-            }
-            const queryResult = await vault.callStatic.queryBatchSwap(
-                swapType,
-                swapInfo.swaps,
-                swapInfo.tokenAddresses,
-                funds
-            );
 
-            console.log('swapInfo', swapInfo);
-            console.log('queryResult', queryResult);
-
-            // expect(swapInfo.swapAmount.toString()).to.eq(
-            //     queryResult[0].toString()
-            // );
-
-            expect(swapInfo.returnAmount.toString()).to.be.eq(
-                queryResult[1].abs().toString()
-            );
+            expect(swapInfo.returnAmount.toString()).to.be.eq('13436828');
         });
 
-        // it('ExactOut', async function () {
-        //     if (!test) this.skip();
+        it('ExactOut', async function () {
+            if (!test) this.skip();
 
-        //     const swapType = SwapTypes.SwapExactOut;
-        //     // swapAmount is tokenOut, expect tokenIn
-        //     const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
-        //     const swapInfo = await sor.getSwaps(
-        //         tokenIn,
-        //         tokenOut,
-        //         swapType,
-        //         swapAmount
-        //     );
+            const swapType = SwapTypes.SwapExactOut;
+            // swapAmount is tokenOut, expect tokenIn
+            // NB: swapAmount should be in the same decimals as the out token
+            const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 6);
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
+            );
 
-        //     const queryResult = await vault.callStatic.queryBatchSwap(
-        //         swapType,
-        //         swapInfo.swaps,
-        //         swapInfo.tokenAddresses,
-        //         funds
-        //     );
-
-        //     expect(swapInfo.returnAmount.toString()).to.be.eq(
-        //         queryResult[0].abs().toString()
-        //     );
-        //     expect(swapInfo.swapAmount.toString()).to.eq(
-        //         queryResult[1].abs().toString()
-        //     );
-        // });
+            expect(swapInfo.returnAmount.toString()).to.be.eq(
+                '7442224646697000014'
+            );
+        });
     });
 });
