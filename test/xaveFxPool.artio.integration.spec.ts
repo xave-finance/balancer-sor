@@ -50,7 +50,7 @@ const poolsStub: SubgraphPoolBase[] = [
                 // "symbol": "NECT_mock",
                 token: {
                     latestFXPrice: '1',
-                    fxOracleDecimals: 0,
+                    fxOracleDecimals: 8,
                 },
             },
             {
@@ -62,7 +62,7 @@ const poolsStub: SubgraphPoolBase[] = [
                 weight: null,
                 token: {
                     latestFXPrice: '1',
-                    fxOracleDecimals: 0,
+                    fxOracleDecimals: 8,
                 },
             },
         ],
@@ -95,7 +95,7 @@ const poolsStub: SubgraphPoolBase[] = [
                 weight: null,
                 token: {
                     latestFXPrice: '1',
-                    fxOracleDecimals: 0,
+                    fxOracleDecimals: 8,
                 },
             },
             {
@@ -107,7 +107,7 @@ const poolsStub: SubgraphPoolBase[] = [
                 weight: null,
                 token: {
                     latestFXPrice: '1',
-                    fxOracleDecimals: 0,
+                    fxOracleDecimals: 8,
                 },
             },
         ],
@@ -140,7 +140,7 @@ const poolsStub: SubgraphPoolBase[] = [
                 weight: null,
                 token: {
                     latestFXPrice: '0.74310736',
-                    fxOracleDecimals: 0,
+                    fxOracleDecimals: 8,
                 },
             },
             {
@@ -152,7 +152,7 @@ const poolsStub: SubgraphPoolBase[] = [
                 weight: null,
                 token: {
                     latestFXPrice: '1',
-                    fxOracleDecimals: 0,
+                    fxOracleDecimals: 8,
                 },
             },
         ],
