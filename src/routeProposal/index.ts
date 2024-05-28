@@ -56,6 +56,10 @@ export class RouteProposer {
             swapOptions.maxPools
         );
 
+        console.log(
+            `[getCandidatePaths] directPools: ${directPools.length}; hopsIn: ${hopsIn.length}; hopsOut: ${hopsOut.length}`
+        );
+
         const pathData = producePaths(
             tokenIn,
             tokenOut,
@@ -64,6 +68,8 @@ export class RouteProposer {
             hopsOut,
             poolsAllDict
         );
+
+        console.log(`[getCandidatePaths] pathData: ${pathData.length}`);
 
         const boostedPaths = getBoostedPaths(
             tokenIn,
@@ -87,17 +93,31 @@ export class RouteProposer {
                 (pool) => <PoolSimple>{ id: pool.id, tokens: pool.tokensList }
             )
         );
+        console.log(
+            `[getCandidatePaths] triPathMidPoolsDynamic: ${triPathMidPoolsDynamic.length}`,
+            triPathMidPoolsDynamic
+        );
 
         const triPaths = getTriPaths(tokenIn, tokenOut, poolsAllDict, [
             ...(this.config.triPathMidPoolIds ?? []),
             ...triPathMidPoolsDynamic,
         ]);
 
+        console.log(
+            `[getCandidatePaths] triPaths: ${triPaths.length}`,
+            triPaths
+        );
+
         const combinedPathData = pathData
             .concat(...boostedPaths)
             .concat(...pathsUsingStaBal)
             .concat(...triPaths);
         const [paths] = calculatePathLimits(combinedPathData, swapType);
+
+        console.log(
+            `[getCandidatePaths] calculatePathLimits paths: ${paths.length}`,
+            paths
+        );
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =
             {

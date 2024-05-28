@@ -178,6 +178,7 @@ export class SOR {
         pools: SubgraphPoolBase[],
         swapOptions: SwapOptions
     ): Promise<SwapInfo> {
+        console.log(`[processSwaps] ${tokenIn} -> ${tokenOut}`);
         if (pools.length === 0) return cloneDeep(EMPTY_SWAPINFO);
 
         const paths = this.routeProposer.getCandidatePaths(
@@ -187,6 +188,7 @@ export class SOR {
             pools,
             swapOptions
         );
+        console.log(`[processSwaps] candidate paths: ${paths.length}`, paths);
 
         if (paths.length == 0) return cloneDeep(EMPTY_SWAPINFO);
 
@@ -223,6 +225,11 @@ export class SOR {
                 costOutputToken,
                 swapOptions.maxPools
             );
+        console.log(
+            `[processSwaps] best paths: Swaps length: ${
+                swaps.length
+            }; total: ${total.toString()}; totalConsideringFees: ${totalConsideringFees}`
+        );
 
         const swapInfo = formatSwaps(
             swaps,
